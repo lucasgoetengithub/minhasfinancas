@@ -3,6 +3,7 @@ package com.lgoeten.minhasfinancas.service;
 import com.lgoeten.minhasfinancas.exceptions.RegraNegocioException;
 import com.lgoeten.minhasfinancas.model.entity.Lancamento;
 import com.lgoeten.minhasfinancas.model.enums.StatusLancamento;
+import com.lgoeten.minhasfinancas.model.enums.TipoLancamento;
 import com.lgoeten.minhasfinancas.repository.LancamentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -59,6 +60,23 @@ public class LancamentoService {
     public void atualizarLancamento(Lancamento lancamento, StatusLancamento status) {
         lancamento.setStatus(status);
         atualizar(lancamento);
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal obterSaldoPorUsuario(Long id) {
+        BigDecimal receitas = lancamentoRepository.obterSaldoPorTipoLancamentoEUsuarioEStatus(id, TipoLancamento.RECEITA, StatusLancamento.EFETIVADO);
+        BigDecimal despesas = lancamentoRepository.obterSaldoPorTipoLancamentoEUsuarioEStatus(id, TipoLancamento.DESPESA, StatusLancamento.EFETIVADO);
+
+        if(receitas == null) {
+            receitas = BigDecimal.ZERO;
+        }
+
+        if(despesas == null) {
+            despesas = BigDecimal.ZERO;
+        }
+
+        return receitas.subtract(despesas);
+
     }
 
     public void validar(Lancamento lancamento) {
