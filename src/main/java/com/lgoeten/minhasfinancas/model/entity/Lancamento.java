@@ -33,7 +33,7 @@ public class Lancamento {
     @Id
     @Column( name="id" )
     @GeneratedValue( strategy = GenerationType.IDENTITY )
-    private long id;
+    private Long id;
 
     @Column(name = "descricao")
     private String descricao;
