@@ -64,6 +64,7 @@ public class UsuarioResource {
     public ResponseEntity obterSaldo( @PathVariable("id") Long id ) {
         Optional<Usuario> usuario = service.obterPorId(id);
 
+
         if(!usuario.isPresent()) {
             return new ResponseEntity( HttpStatus.NOT_FOUND );
         }
