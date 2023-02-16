@@ -7,6 +7,7 @@ import com.lgoeten.minhasfinancas.exceptions.ErroAutenticacaoException;
 import com.lgoeten.minhasfinancas.exceptions.RegraNegocioException;
 import com.lgoeten.minhasfinancas.model.entity.Usuario;
 import com.lgoeten.minhasfinancas.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,11 +22,11 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@RequiredArgsConstructor
 public class UsuarioResource {
 
 
-    private final UsuarioService service;
+    @Autowired
+    private UsuarioService service;
 
     @PostMapping
     public ResponseEntity salvar( @RequestBody UsuarioDTO dto ) {

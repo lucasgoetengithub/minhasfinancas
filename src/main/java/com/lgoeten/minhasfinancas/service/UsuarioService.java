@@ -42,5 +42,9 @@ public class UsuarioService {
         }
     }
 
+    public Optional<Usuario> obterPorId(Long id) {
+        return usuarioRepository.findById(id);
+    }
+
 
 }
