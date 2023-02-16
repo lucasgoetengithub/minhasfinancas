@@ -10,9 +10,11 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class LancamentoService {
@@ -48,6 +50,10 @@ public class LancamentoService {
                         .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING) );
 
         return lancamentoRepository.findAll(example);
+    }
+
+    public Optional<Lancamento> findById(Long id) {
+        return lancamentoRepository.findById(id);
     }
 
     public void atualizarLancamento(Lancamento lancamento, StatusLancamento status) {

@@ -9,11 +9,12 @@ import com.lgoeten.minhasfinancas.model.enums.TipoLancamento;
 import com.lgoeten.minhasfinancas.service.LancamentoService;
 import com.lgoeten.minhasfinancas.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/lancamentos")
@@ -25,41 +26,58 @@ public class LancamentoResource {
     @Autowired
     private UsuarioService usuarioService;
 
-
-    @PostMapping
-    public ResponseEntity salvar(@RequestBody LancamentoDTO lancamentoDTO) {
-        try {
-
-        } catch (Exception e) {
-
-        }
-    }
-
-    @PostMapping
-    public ResponseEntity salvar(@RequestBody LancamentoDTO lancamentoDTO) {
-        try {
-
-        } catch (Exception e) {
-
-        }
-    }
-
-    @PostMapping
-    public ResponseEntity salvar(@RequestBody LancamentoDTO lancamentoDTO) {
-        try {
-
-        } catch (Exception e) {
-
-        }
-    }
-
     @PostMapping
     public ResponseEntity salvar(@RequestBody LancamentoDTO lancamentoDTO) {
         try {
             Lancamento entidade = converter(lancamentoDTO);
-        } catch (Exception e) {
-
+            entidade = lancamentoService.salvar(entidade);
+            return new ResponseEntity(entidade, HttpStatus.CREATED);
+        } catch (RegraNegocioException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity atualizar(@PathVariable("id") Long id, @RequestBody LancamentoDTO lancamentoDTO) {
+           return lancamentoService.findById(id).map( entity -> {
+               try {
+                   Lancamento lancamento = converter(lancamentoDTO);
+                   lancamento.setId(entity.getId());
+                   lancamentoService.atualizar(lancamento);
+                   return ResponseEntity.ok(lancamento);
+               } catch (RegraNegocioException e) {
+                   return ResponseEntity.badRequest().body(e.getMessage());
+               }
+            }).orElseGet(() -> new ResponseEntity("Lancamento não encontrado na base de dados", HttpStatus.BAD_REQUEST));
+    }
+
+    @DeleteMapping
+    public ResponseEntity deletar(@PathVariable("id") Long id) {
+        return lancamentoService.findById(id).map(entidade -> {
+            lancamentoService.deletar(entidade);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }).orElseGet( () -> new ResponseEntity("Lancamento náo encontrado na base de dados.", HttpStatus.BAD_REQUEST));
+    }
+
+    @GetMapping
+    public ResponseEntity find(@RequestParam(value="descricao", required = false) String descricao,
+                               @RequestParam(value="mes", required = false) Integer mes,
+                               @RequestParam(value="ano", required = false) Integer ano,
+                               @RequestParam(value="usuario") Long usuarioId) {
+        Lancamento lancamento = new Lancamento();
+        lancamento.setDescricao(descricao);
+        lancamento.setMes(mes);
+        lancamento.setAno(ano);
+
+        Optional<Usuario> usuario = usuarioService.obterPorId(usuarioId);
+        if (!usuario.isPresent()) {
+            return ResponseEntity.badRequest().body("Usuario não encontrado para o Id informado.");
+        } else {
+            lancamento.setUsuario(usuario.get());
+        }
+
+        List<Lancamento> lancamentoList = lancamentoService.buscar(lancamento);
+        return ResponseEntity.ok(lancamentoList);
     }
 
     private LancamentoDTO converter(Lancamento lancamento) {
