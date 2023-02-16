@@ -1,5 +1,6 @@
 package com.lgoeten.minhasfinancas.api.resource;
 
+import com.lgoeten.minhasfinancas.api.dto.AtualizaStatusDTO;
 import com.lgoeten.minhasfinancas.api.dto.LancamentoDTO;
 import com.lgoeten.minhasfinancas.exceptions.RegraNegocioException;
 import com.lgoeten.minhasfinancas.model.entity.Lancamento;
@@ -8,6 +9,8 @@ import com.lgoeten.minhasfinancas.model.enums.StatusLancamento;
 import com.lgoeten.minhasfinancas.model.enums.TipoLancamento;
 import com.lgoeten.minhasfinancas.service.LancamentoService;
 import com.lgoeten.minhasfinancas.service.UsuarioService;
+import jdk.jshell.Snippet;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,6 +81,27 @@ public class LancamentoResource {
 
         List<Lancamento> lancamentoList = lancamentoService.buscar(lancamento);
         return ResponseEntity.ok(lancamentoList);
+    }
+
+    @PutMapping("/{id}/atualiza-tatus")
+    public ResponseEntity atualizarStatus(@PathVariable Long id, @RequestBody AtualizaStatusDTO atualizaStatusDTO) {
+
+        return lancamentoService.findById(id).map(entity -> {
+            StatusLancamento statusLancamento = StatusLancamento.valueOf(atualizaStatusDTO.getStatus());
+            if (statusLancamento == null) {
+                return ResponseEntity.badRequest().body("Não foi possivel atualizar o status do lançamento, envie um status válido.");
+            }
+
+            try {
+                entity.setStatus(statusLancamento);
+                lancamentoService.atualizar(entity);
+
+                return ResponseEntity.ok(entity);
+            } catch (RegraNegocioException e) {
+                return ResponseEntity.badRequest().body(e.getMessage());
+            }
+
+        }).orElseGet(() -> new ResponseEntity("Lançamento não encontrado na base de dados.", HttpStatus.BAD_REQUEST));
     }
 
     private LancamentoDTO converter(Lancamento lancamento) {
